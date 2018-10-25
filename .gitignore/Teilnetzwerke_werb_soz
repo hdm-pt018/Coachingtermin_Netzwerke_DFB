@@ -1,0 +1,217 @@
+# Edge- und Nodelist koppeln
+
+
+# Gesamtnetzwerk dfb 
+
+library(igraph)
+# liest die Dateien direkt aus dem github-Verzeichnis ein
+el <- read.csv("https://raw.githubusercontent.com/kh107/hdm_NO1/master/1810_Edgelist-aktuell.csv", header=T, as.is=T, sep = ",")
+nodes <- read.csv("https://raw.githubusercontent.com/kh107/hdm_NO1/master/201018_Nodelist.csv", header=T, as.is=T, sep = ",")
+# prüft, ob alle Variablen eingelesen wurden
+head(el)
+head(nodes)
+# wandelt die edgelist in eine Matrix um und baut das igraph-Objekt
+hties <-as.matrix(el)
+dfb <- graph_from_data_frame(d=hties, vertices=nodes, directed=F)
+dfb
+plot(dfb)
+
+
+# SELEKTION und VERGLEICH von zwei Teilnetzwerken
+# wir wollen Soziales Engagement (soz) mit Werbekooperationen (werb) vergleichen. Deshalb müssen wir das Netzwerk erst noch in zwei separate Netzwerke aufteilen:
+
+# Selektion in Teilnetzwerk soz und werb
+edge.attributes(dfb)
+edge.attributes(dfb)$relation
+# das edge attribut relationship ist in 1 (Soziales) und 2 (Werbekooperation) kodiert.
+
+#-----------------------------------------------------------------------------------------------
+
+soz <- subgraph.edges(dfb, E(dfb)[relationship == 1])
+soz
+edge.attributes(soz)$relation
+plot(soz, edge.arrow.size=0.1, main="Soziales Engagement")
+
+# EINFÄRBEN aufgrund von Vertex-Attributen
+
+# Im Netzwerk sind Spieler, Engagement und Werbekooperationen abgelegt, die über das Vertex.Attribut $Type mit "1" (Spieler) oder "2" (Werbekooperationen) oder "3" (soziales Engagement) kodiert sind.
+vertex.attributes(soz)$type
+
+#Alle Spieler sollen nun mit der Farbe grün, alle Werbekooperationen mit der Farbe grau und soziales Engagement mit der Farbe blau visualisiert werden.
+
+#FARBEN nach Vertex-Attributen definieren
+faerbung <- c("green", "grey", "blue")
+
+#definiert das Farbspektrum, der verwendeten Farben und legt diese in einem neuen Vector faerbung fest. Da wir wissen, dass wir bei §Type nur drei Werte haben (Spieler, Werbekooperationen, soziales Engagement) brauchen wir auch drei Werte. Die direkten Farbpaletten sind hier hinterlegt: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf.
+
+
+V(soz)$color <- faerbung[V(soz)$Type]
+# weist dem Vertex-Attribut color die Funktion faerbung zu, die wir vorher mit drei Farben definiert haben.
+
+plot(soz)
+
+# FORM DER AKTEURE ANPASSEN
+
+V(soz)$shape = "square"
+# definiert, dass alle Knoten als square auftreten
+
+spieler <- V(soz)[Type == "1"]
+# wöhlt alle Knoten aus, die das Vertex-Attribut "1" bei Type gesetzt haben
+
+spieler
+
+V(soz)[spieler]$shape = "circle"
+# weist allen Werten von spieler den Shape "cirle" zu.
+
+plot(soz)
+
+
+# Das Netzwerk wird entzerrt mit der Variable
+coords <- layout_with_kk(soz)*0.5
+
+# Relative Werte durch die Größe der Knoten abbilden
+
+# berechnet den Degree-Wert für alle Knoten und weist ihm die Variable "knotengroesse" zu.
+knotengroesse <- degree(soz)
+knotengroesse
+
+# plottet da Netzwerk und ändert die Größe des Knotens nach dem Degree-Wert
+par(mfrow=c(1,1)) 
+
+
+plot(soz, 
+     vertex.size=knotengroesse*3, # führt die relative Größe der Knoten aus
+     vertex.frame.color="black", 
+     vertex.label.family = "Helvetica", 
+     vertex.label.color = "grey25", 
+     layout=coords, 
+     edge.color="grey80",
+     edge.curved=.2,
+     edge.width=E(soz)$weight,
+     rescale=FALSE, 
+     ylim=c(-3.5,3),
+     xlim=c(-5,5), 
+     asp = 0,
+     main="Teilnetzwerk Soziales Engagement")
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------
+
+# Teilnetzwerk Werbekooperationen
+
+werb <- subgraph.edges(dfb, E(dfb)[relationship == 2])
+werb
+edge.attributes(werb)$relation
+plot(werb, main="Werbekooperationen")
+
+# EINFÄRBEN aufgrund von Vertex-Attributen
+
+# Im Netzwerk sind Spieler, Engagement und Werbekooperationen abgelegt, die über das Vertex.Attribut $Type mit "1" (Spieler) oder "2" (Werbekooperationen) oder "3" (soziales Engagement) kodiert sind.
+vertex.attributes(werb)$type
+
+#Alle Spieler sollen nun mit der Farbe grün, alle Werbekooperationen mit der Farbe grau und soziales Engagement mit der Farbe blau visualisiert werden.
+
+#FARBEN nach Vertex-Attributen definieren
+faerbung <- c("green", "grey", "blue")
+
+#definiert das Farbspektrum, der verwendeten Farben und legt diese in einem neuen Vector faerbung fest. Da wir wissen, dass wir bei §Type nur drei Werte haben (Spieler, Werbekooperationen, soziales Engagement) brauchen wir auch drei Werte. Die direkten Farbpaletten sind hier hinterlegt: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf.
+
+
+V(werb)$color <- faerbung[V(werb)$Type]
+# weist dem Vertex-Attribut color die Funktion faerbung zu, die wir vorher mit drei Farben definiert haben.
+
+plot(werb)
+
+# FORM DER AKTEURE ANPASSEN
+
+V(werb)$shape = "square"
+# definiert, dass alle Knoten als square auftreten
+
+spieler <- V(werb)[Type == "1"]
+# wöhlt alle Knoten aus, die das Vertex-Attribut "1" bei Type gesetzt haben
+
+spieler
+
+V(werb)[spieler]$shape = "circle"
+# weist allen Werten von spieler den Shape "cirle" zu.
+
+plot(werb)
+
+
+# Das Netzwerk wird entzerrt mit der Variable
+coords <- layout_with_kk(werb)*0.5
+
+# Relative Werte durch die Größe der Knoten abbilden
+
+# berechnet den Degree-Wert für alle Knoten und weist ihm die Variable "dh" zu.
+knotengroesse <- degree(werb)
+knotengroesse
+
+# plottet da Netzwerk und ändert die Größe des Knotens nach dem Degree-Wert
+par(mfrow=c(1,1))
+
+# Die Fenstergröße wird mit den x- und y-Werten an das Netzwerk angepasst (muss ausprobiert und angepasst werden).
+plot(werb, 
+     vertex.size=knotengroesse*3,
+     vertex.frame.color="black", 
+     vertex.label.family = "Helvetica", 
+     vertex.label.color = "grey25", 
+     edge.curved=.2,
+     edge.width=E(werb)$weight,
+     layout=coords, 
+     rescale=FALSE, 
+     ylim=c(-3.5,3),
+     xlim=c(-5,5), 
+     asp = 0, 
+     edge.color="grey80",
+     main="Teilnetzwerk Werbekooperationen")
+
+
+
+#---------------------------------------------------------------------------------------------------------
+
+#DIREKTER VERGLEICH von zwei Netzwerken
+
+# direkter Vergleich der beiden Netzwerke herstellen
+
+par(mfrow=c(1,2), mar=c(0,0,2,0))
+plot(werb, layout = layout_with_kk, main="Teilnetzwerk Werbekooperationen")
+plot(soz, layout = layout_with_kk, main="Teilnetzwerk Soziales Engagement")
+
+
+plot(soz, 
+     layout = layout_with_kk, 
+     main="Teilnetzwerk Soziales Engagement",
+     vertex.size=knotengroesse*3, # führt die relative Größe der Knoten aus
+     vertex.frame.color="black", 
+     vertex.label.family = "Helvetica", 
+     vertex.label.color = "grey25", 
+     layout=coords, 
+     edge.color="grey80",
+     edge.curved=.2,
+     edge.width=E(soz)$weight,
+     ylim=c(-1,1),
+     xlim=c(-2,2), 
+     rescale=TRUE, 
+     asp = 0,)
+
+
+plot(werb, 
+     layout = layout_with_kk, 
+     main="Teilnetzwerk Werbekooperationen",
+     vertex.size=knotengroesse*3,
+     vertex.frame.color="black", 
+     vertex.label.family = "Helvetica", 
+     vertex.label.color = "grey25", 
+     edge.curved=.2,
+     edge.width=E(werb)$weight,
+     layout=coords, 
+     ylim=c(-1,1),
+     xlim=c(-2,2), 
+     rescale=TRUE, 
+     asp = 0, 
+     edge.color="grey80",)
