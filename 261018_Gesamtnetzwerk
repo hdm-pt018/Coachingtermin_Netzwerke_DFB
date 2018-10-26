@@ -6,7 +6,7 @@
 #Igraph-Objekt
 library(igraph)
 # liest die Dateien direkt aus dem github-Verzeichnis ein
-el <- read.csv("https://raw.githubusercontent.com/kh107/hdm_NO1/master/1810_Edgelist-aktuell.csv", header=T, as.is=T, sep = ",")
+el <- read.csv("https://raw.githubusercontent.com/hdm-pt018/Coachingtermin_Netzwerke_DFB/master/261018_Edgelist", header=T, as.is=T, sep = ",")
 nodes <- read.csv("https://raw.githubusercontent.com/kh107/hdm_NO1/master/201018_Nodelist.csv", header=T, as.is=T, sep = ",")
 # prüft, ob alle Variablen eingelesen wurden
 head(el)
